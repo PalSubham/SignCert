@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (1:1.4+202410161351+e7c3feb100)"
+   sodipodi:docname="info.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="45.254834"
+     inkscape:cx="8.1648736"
+     inkscape:cy="7.9107571"
+     inkscape:window-width="1920"
+     inkscape:window-height="973"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g3"
+       transform="matrix(3.7821452,0,0,3.7821452,-0.01626515,-0.01626648)">
+      <circle
+         style="fill:#44aa00;stroke-width:0.352835"
+         id="path1"
+         cx="2.1225128"
+         cy="2.1225133"
+         r="2.1166666" />
+      <path
+         id="rect3-5"
+         style="fill:#ffffff;stroke-width:0.251642"
+         d="m 3.3837914,0.74421051 c -0.094413,8.8844e-4 -0.1876311,0.040305 -0.2518817,0.11618162 L 1.5325592,2.7501966 0.57942404,2.0382755 C 0.44190875,1.9356128 0.26029041,1.9686046 0.17213996,2.1124339 0.0839895,2.2562632 0.12333369,2.454722 0.26084897,2.5573847 L 1.4432029,3.4398702 c 0.1339702,0.1000161 0.309675,0.070893 0.4001614,-0.063653 0.0069,-0.0068 0.013715,-0.013504 0.020073,-0.021012 L 3.642148,1.2540494 C 3.7563711,1.1191579 3.7349209,0.92305829 3.5935847,0.81404301 3.5317501,0.76634896 3.4572235,0.74351955 3.3837914,0.74421051 Z" />
+    </g>
+  </g>
+</svg>

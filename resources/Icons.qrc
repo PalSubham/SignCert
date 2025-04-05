@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="error_icon">icons/error.svg</file>
+        <file alias="info_icon">icons/info.svg</file>
+        <file alias="warn_icon">icons/warn.svg</file>
+    </qresource>
+</RCC>
