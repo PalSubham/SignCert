@@ -4,6 +4,8 @@
 #include <memory>
 
 #include <QObject>
+#include <QMutex>
+#include <QWaitCondition>
 
 #include <botan/x509cert.h>
 #include <botan/pkcs10.h>
@@ -18,7 +20,7 @@ class CSRSigner : public QObject
 public:
     explicit CSRSigner(QObject *parent = nullptr);
 
-    Q_INVOKABLE void setParams(
+    void setParams(
         const QString &csrFile,
         const QString &caFile,
         const QString &caKeyFile,
@@ -27,9 +29,10 @@ public:
         const QString &outFileName,
         const QString &outFileExtn
     );
+    void sign();
 
 public slots:
-    void sign();
+    void providePassword(const QString &password);
 
 signals:
     void info(const QString &info);
@@ -39,14 +42,15 @@ signals:
     void finished();
 
 private:
-    QString csrFile, caFile, caKeyFile, outDir, outFileName, outFileExtn;
+    QString csrFile, caFile, caKeyFile, outDir, outFileName, outFileExtn, password;
     unsigned int days;
+
+    QMutex mutex;
+    QWaitCondition wait;
 
     unique_ptr<PKCS10_Request> load_csr(const QString &path);
     unique_ptr<X509_Certificate> load_ca(const QString &path);
     unique_ptr<Private_Key> load_ca_key(const QString &path);
-
-    static vector<uint8_t> read_all(const QString &path);
 };
 
 #endif // CSRSIGNER_H

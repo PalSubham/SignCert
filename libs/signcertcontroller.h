@@ -22,6 +22,9 @@ public:
         const QString &outFileExtn
     );
 
+public slots:
+    void providePassword(const QString &password);
+
 signals:
     void info(const QString &info);
     void warn(const QString &warn);

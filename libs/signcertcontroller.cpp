@@ -40,3 +40,16 @@ void SignCertController::startSigning(
 
     workerThread->start();
 }
+
+void SignCertController::providePassword(const QString &password)
+{
+    if (worker)
+    {
+        QMetaObject::invokeMethod(
+            worker,
+            "providePassword",
+            Qt::QueuedConnection,
+            Q_ARG(QString, password)
+        );
+    }
+}
