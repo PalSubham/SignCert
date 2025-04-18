@@ -3,5 +3,7 @@
         <file alias="error_icon">icons/error.svg</file>
         <file alias="info_icon">icons/info.svg</file>
         <file alias="warn_icon">icons/warn.svg</file>
+        <file alias="visibility">icons/visibility.svg</file>
+        <file alias="visibility_off">icons/visibility_off.svg</file>
     </qresource>
 </RCC>

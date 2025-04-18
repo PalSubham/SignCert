@@ -2,7 +2,10 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
+#include <openssl/crypto.h>
+
 #include "libs/filehandler.h"
+#include "libs/signcertcontroller.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,8 +18,10 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     FileHandler filehandler;
+    SignCertController signCertController;
 
     engine.rootContext()->setContextProperty("filehandler", &filehandler);
+    engine.rootContext()->setContextProperty("signcert", &signCertController);
 
     QObject::connect(
         &engine,
@@ -26,5 +31,9 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
     engine.loadFromModule("SignCert", "Main");
 
-    return app.exec();
+    int result = app.exec();
+
+    OPENSSL_cleanup();
+
+    return result;
 }

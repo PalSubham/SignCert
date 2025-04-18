@@ -9,8 +9,8 @@ class FileHandler : public QObject
 public:
     explicit FileHandler(QObject *parent = nullptr);
 
-    Q_INVOKABLE bool folderExists(const QString& folder);
-    Q_INVOKABLE bool fileExists(const QString& file);
+    Q_INVOKABLE bool folderExists(const QString &folder);
+    Q_INVOKABLE bool fileExists(const QString &file);
 };
 
 #endif // FILEHANDLER_H

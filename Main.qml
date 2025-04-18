@@ -13,6 +13,8 @@ ApplicationWindow {
     visible: true
     title: qsTr("Sign Your CSR")
 
+    property bool signing: false
+
     PersistentFileDialog {
         id: csrSelector
         settingsKey: "csrDialog"
@@ -112,6 +114,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
+                enabled: !signing
             }
         }
 
@@ -143,6 +146,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
+                enabled: !signing
             }
         }
 
@@ -174,6 +178,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
+                enabled: !signing
             }
         }
 
@@ -194,6 +199,7 @@ ApplicationWindow {
                 value: 365
                 editable: true
                 width: 350
+                enabled: !signing
             }
             Button {
                 width: 140
@@ -207,6 +213,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
+                enabled: !signing
             }
         }
 
@@ -242,6 +249,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
+                enabled: !signing
             }
         }
 
@@ -259,11 +267,13 @@ ApplicationWindow {
                 width: 350
                 height: parent.height
                 placeholderText: qsTr("Enter out file name...")
+                enabled: !signing
             }
             ComboBox {
                 width: 140
                 model: [qsTr(".pem"), qsTr(".der")]
                 currentIndex: 0
+                enabled: !signing
             }
         }
 
@@ -278,6 +288,61 @@ ApplicationWindow {
                 color: mainWindow.palette.text
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
+            }
+            enabled: !signing
+            onClicked: {
+                let valid = true;
+
+                if (!csrField.text) {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("No CSR Selected"), statusHelper.error);
+                }
+                else if (!filehandler.fileExists(csrField.text)) {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("CSR Doesn't Exist"), statusHelper.error);
+                }
+
+                if (!caCertField.text) {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("No CA Cert Selected"), statusHelper.error);
+                }
+                else if (!filehandler.fileExists(caCertField.text)) {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("CA Cert Doesn't Exist"), statusHelper.error);
+                }
+
+                if (!caKeyField.text) {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("No CA Key Selected"), statusHelper.error);
+                }
+                else if (!filehandler.fileExists(caKeyField.text)) {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("CA Key Doesn't Exist"), statusHelper.error);
+                }
+
+                if (daysField.value < 1 || daysField.value > 3650)
+                {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("Invalid Number of Days"), statusHelper.error);
+                }
+
+                if (!outFolderField.text) {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("No Out Directory Selected"), statusHelper.error);
+                }
+                else if (!filehandler.folderExists(outFolderField.text)) {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("Out Directory Doesn't Exist"), statusHelper.error);
+                }
+
+                if (!outFileNameField.text) {
+                    valid = false;
+                    statusHelper.appendStatus(statusList, qsTr("No Out File Mentioned"), statusHelper.error);
+                }
+
+                if (valid) {
+
+                }
             }
         }
 

@@ -12,8 +12,10 @@ Popup {
     width: parent.width
     padding: 0
     background: Rectangle {
-        color: Qt.rgba(0, 0, 0, 0.6)
+        color: Qt.rgba(0, 0, 0, 0.7)
     }
+
+    property bool passwordVisible: false
 
     Rectangle {
         width: passwordColumn.implicitWidth + 40
@@ -34,22 +36,51 @@ Popup {
                 spacing: 10
                 Layout.fillWidth: true
 
+                Text {
+                    text: qsTr("Password for CA Key")
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    font.bold: true
+                    font.italic: true
+                }
+            }
+
+            RowLayout {
+                spacing: 10
+                Layout.fillWidth: true
+
                 Label {
                     text: qsTr("Password:")
-                    Layout.preferredWidth: 100
-                    height: parent.height
+                    Layout.preferredWidth: 70
+                    Layout.fillHeight: true
                     verticalAlignment: Text.AlignVCenter
                 }
-                TextField {
-                    id: passwordField
-                    Layout.preferredWidth: 400
-                    height: parent.height
-                    placeholderText: qsTr("Enter Password...")
+
+                RowLayout {
+                    spacing: 5
+
+                    TextField {
+                        id: passwordField
+                        Layout.preferredWidth: 400
+                        Layout.fillHeight: true
+                        placeholderText: qsTr("Enter Password...")
+                        echoMode: passwordVisible ? TextInput.Normal : TextInput.Password
+                    }
+
+                    Button {
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: height
+                        icon.source: passwordVisible ? "qrc:/icons/visibility_off" : "qrc:/icons/visibility"
+                        onClicked: passwordVisible = !passwordVisible
+                    }
                 }
             }
 
             Button {
                 Layout.preferredWidth: 80
+                Layout.fillHeight: true
                 text: qsTr("Ok")
                 contentItem: Text {
                     height: parent.height
