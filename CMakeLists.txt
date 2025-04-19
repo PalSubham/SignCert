@@ -11,6 +11,8 @@ qt_standard_project_setup(REQUIRES 6.8)
 
 set(CMAKE_AUTORCC ON)
 
+find_library(BOTAN_LIBRARIES NAMES botan-3)
+
 qt_add_executable(appSignCert
     main.cpp
     resources/Icons.qrc
@@ -44,7 +46,7 @@ set_target_properties(appSignCert PROPERTIES
 )
 
 target_link_libraries(appSignCert
-    PRIVATE Qt6::Quick
+    PRIVATE ${BOTAN_LIBRARIES} Qt6::Quick
 )
 
 include(GNUInstallDirs)

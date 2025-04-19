@@ -16,6 +16,16 @@ Popup {
     }
 
     property bool passwordVisible: false
+    property bool passwordPresent: false
+
+    Timer {
+        id: debounceTimer
+        interval: 500 // ms
+        repeat: false
+        onTriggered: {
+            passwordPresent = passwordField.text.length > 0;
+        }
+    }
 
     Rectangle {
         width: passwordColumn.implicitWidth + 40
@@ -67,6 +77,7 @@ Popup {
                         Layout.fillHeight: true
                         placeholderText: qsTr("Enter Password...")
                         echoMode: passwordVisible ? TextInput.Normal : TextInput.Password
+                        onTextChanged: debounceTimer.restart()
                     }
 
                     Button {
@@ -90,7 +101,11 @@ Popup {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                onClicked: passwordModal.close()
+                enabled: passwordPresent
+                onClicked: {
+                    signcert.providePassword(passwordField.text);
+                    passwordModal.close();
+                }
                 Layout.alignment: Qt.AlignRight
             }
         }

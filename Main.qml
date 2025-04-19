@@ -14,6 +14,7 @@ ApplicationWindow {
     title: qsTr("Sign Your CSR")
 
     property bool signing: false
+    property bool dataPresent: false
 
     PersistentFileDialog {
         id: csrSelector
@@ -22,7 +23,7 @@ ApplicationWindow {
         fileMode: FileDialog.OpenFile
         nameFilters: [qsTr("CSR file (*.csr)"), qsTr("DER file (*.der)")]
         onAccepted: {
-            csrField.text = selectedFile.toString().replace("file://", "")
+            csrField.text = selectedFile.toString().replace("file://", "");
             statusHelper.appendStatus(statusList, qsTr(`CSR: ${csrField.text}`), statusHelper.info);
         }
     }
@@ -34,7 +35,7 @@ ApplicationWindow {
         fileMode: FileDialog.OpenFile
         nameFilters: [qsTr("CRT file (*.csr)"), qsTr("PEM file (*.pem)"), qsTr("DER file (*.der)")]
         onAccepted: {
-            caCertField.text = selectedFile.toString().replace("file://", "")
+            caCertField.text = selectedFile.toString().replace("file://", "");
             statusHelper.appendStatus(statusList, qsTr(`CA: ${caCertField.text}`), statusHelper.info);
         }
     }
@@ -46,7 +47,7 @@ ApplicationWindow {
         fileMode: FileDialog.OpenFile
         nameFilters: [qsTr("KEY file (*.key)"), qsTr("PEM file (*.pem)"), qsTr("DER file (*.der)")]
         onAccepted: {
-            caKeyField.text = selectedFile.toString().replace("file://", "")
+            caKeyField.text = selectedFile.toString().replace("file://", "");
             statusHelper.appendStatus(statusList, qsTr(`CA Key: ${caKeyField.text}`), statusHelper.info);
         }
     }
@@ -56,7 +57,7 @@ ApplicationWindow {
         settingsKey: "outFolderDialog"
         title: qsTr("Please choose the output directory")
         onAccepted: {
-            outFolderField.text = selectedFolder.toString().replace("file://", "")
+            outFolderField.text = selectedFolder.toString().replace("file://", "");
             statusHelper.appendStatus(statusList, qsTr(`Out Dir: ${outFolderField.text}`), statusHelper.info);
         }
     }
@@ -74,6 +75,43 @@ ApplicationWindow {
         anchors.centerIn: parent
         width: mainWindow.width
         margins: 0
+    }
+
+    Connections {
+        target: signcert
+
+        function onNeedPassword() {
+            passwordModal.open();
+        }
+
+        function onFinished() {
+            signing = false;
+        }
+
+        function onInfo(msg) {
+            statusHelper.appendStatus(statusList, qsTr(msg), statusHelper.info);
+        }
+
+        function onWarn(msg) {
+            statusHelper.appendStatus(statusList, qsTr(msg), statusHelper.warn);
+        }
+
+        function onError(msg) {
+            statusHelper.appendStatus(statusList, qsTr(msg), statusHelper.error);
+        }
+    }
+
+    Timer {
+        id: debounceTimer
+        interval: 500 // ms
+        repeat: false
+        onTriggered: {
+            dataPresent = csrField.text.length > 0 &&
+                          caCertField.text.length > 0 &&
+                          caKeyField.text.length > 0 &&
+                          outFolderField.text.length > 0 &&
+                          outFileNameField.text.length > 0;
+        }
     }
 
     Column {
@@ -101,6 +139,7 @@ ApplicationWindow {
                 height: parent.height
                 placeholderText: qsTr("No CSR selected...")
                 readOnly: true
+                onTextChanged: debounceTimer.restart()
             }
             Button {
                 width: 140
@@ -133,6 +172,7 @@ ApplicationWindow {
                 height: parent.height
                 placeholderText: qsTr("No CA certificate selected...")
                 readOnly: true
+                onTextChanged: debounceTimer.restart()
             }
             Button {
                 width: 140
@@ -165,6 +205,7 @@ ApplicationWindow {
                 height: parent.height
                 placeholderText: qsTr("No CA Key selected...")
                 readOnly: true
+                onTextChanged: debounceTimer.restart()
             }
             Button {
                 width: 140
@@ -200,6 +241,11 @@ ApplicationWindow {
                 editable: true
                 width: 350
                 enabled: !signing
+                validator: IntValidator {
+                    locale: daysField.locale.name
+                    bottom: daysField.from
+                    top: daysField.to
+                }
             }
             Button {
                 width: 140
@@ -236,6 +282,7 @@ ApplicationWindow {
                 height: parent.height
                 placeholderText: qsTr("No output directory chosen...")
                 readOnly: true
+                onTextChanged: debounceTimer.restart()
             }
             Button {
                 width: 140
@@ -268,8 +315,10 @@ ApplicationWindow {
                 height: parent.height
                 placeholderText: qsTr("Enter out file name...")
                 enabled: !signing
+                onTextChanged: debounceTimer.restart()
             }
             ComboBox {
+                id: outExtnField
                 width: 140
                 model: [qsTr(".pem"), qsTr(".der")]
                 currentIndex: 0
@@ -289,59 +338,41 @@ ApplicationWindow {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
-            enabled: !signing
+            enabled: !signing && dataPresent
             onClicked: {
                 let valid = true;
 
-                if (!csrField.text) {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("No CSR Selected"), statusHelper.error);
-                }
-                else if (!filehandler.fileExists(csrField.text)) {
+                if (!filehandler.fileExists(csrField.text)) {
                     valid = false;
                     statusHelper.appendStatus(statusList, qsTr("CSR Doesn't Exist"), statusHelper.error);
                 }
 
-                if (!caCertField.text) {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("No CA Cert Selected"), statusHelper.error);
-                }
-                else if (!filehandler.fileExists(caCertField.text)) {
+                if (!filehandler.fileExists(caCertField.text)) {
                     valid = false;
                     statusHelper.appendStatus(statusList, qsTr("CA Cert Doesn't Exist"), statusHelper.error);
                 }
 
-                if (!caKeyField.text) {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("No CA Key Selected"), statusHelper.error);
-                }
-                else if (!filehandler.fileExists(caKeyField.text)) {
+                if (!filehandler.fileExists(caKeyField.text)) {
                     valid = false;
                     statusHelper.appendStatus(statusList, qsTr("CA Key Doesn't Exist"), statusHelper.error);
                 }
 
-                if (daysField.value < 1 || daysField.value > 3650)
-                {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("Invalid Number of Days"), statusHelper.error);
-                }
-
-                if (!outFolderField.text) {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("No Out Directory Selected"), statusHelper.error);
-                }
-                else if (!filehandler.folderExists(outFolderField.text)) {
+                if (!filehandler.folderExists(outFolderField.text)) {
                     valid = false;
                     statusHelper.appendStatus(statusList, qsTr("Out Directory Doesn't Exist"), statusHelper.error);
                 }
 
-                if (!outFileNameField.text) {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("No Out File Mentioned"), statusHelper.error);
-                }
-
                 if (valid) {
-
+                    signing = true;
+                    signcert.startSigning(
+                        csrField.text,
+                        caCertField.text,
+                        caKeyField.text,
+                        daysField.value,
+                        outFolderField.text,
+                        outFileNameField.text,
+                        outExtnField.currentValue
+                    );
                 }
             }
         }

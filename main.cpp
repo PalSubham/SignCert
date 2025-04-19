@@ -2,8 +2,6 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include <openssl/crypto.h>
-
 #include "libs/filehandler.h"
 #include "libs/signcertcontroller.h"
 
@@ -32,8 +30,6 @@ int main(int argc, char *argv[])
     engine.loadFromModule("SignCert", "Main");
 
     int result = app.exec();
-
-    OPENSSL_cleanup();
 
     return result;
 }
