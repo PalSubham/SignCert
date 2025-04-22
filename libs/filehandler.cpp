@@ -2,6 +2,8 @@
 
 #include "filehandler.h"
 
+using namespace SignCert;
+
 FileHandler::FileHandler(QObject *parent)
     : QObject{parent}
 {}

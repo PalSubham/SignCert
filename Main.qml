@@ -99,6 +99,10 @@ ApplicationWindow {
         function onError(msg) {
             statusHelper.appendStatus(statusList, qsTr(msg), statusHelper.error);
         }
+
+        function onDebug(msg) {
+            console.log(msg);
+        }
     }
 
     Timer {

@@ -5,6 +5,8 @@
 #include "libs/filehandler.h"
 #include "libs/signcertcontroller.h"
 
+using namespace SignCert;
+
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);

@@ -1,5 +1,7 @@
 #include "signcertcontroller.h"
 
+using namespace SignCert;
+
 SignCertController::SignCertController(QObject *parent)
     : QObject{parent}
 {}
@@ -27,6 +29,7 @@ void SignCertController::startSigning(
     connect(worker, &CSRSigner::info, this, &SignCertController::info);
     connect(worker, &CSRSigner::warn, this, &SignCertController::warn);
     connect(worker, &CSRSigner::error, this, &SignCertController::error);
+    connect(worker, &CSRSigner::debug, this, &SignCertController::debug);
     connect(worker, &CSRSigner::needPassword, this, &SignCertController::needPassword);
     connect(worker, &CSRSigner::finished, this, [=, this]() {
         workerThread->quit();

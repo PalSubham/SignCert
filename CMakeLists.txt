@@ -32,6 +32,7 @@ qt_add_qml_module(appSignCert
         QML_FILES qmls/PasswordModal.qml
         SOURCES libs/csrsigner.h libs/csrsigner.cpp
         SOURCES libs/signcertcontroller.h libs/signcertcontroller.cpp
+        SOURCES libs/oidhasher.h libs/oidhasher.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

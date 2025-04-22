@@ -6,6 +6,8 @@
 
 #include "csrsigner.h"
 
+namespace SignCert {
+
 class SignCertController : public QObject
 {
     Q_OBJECT
@@ -20,7 +22,7 @@ public:
         const QString &outDir,
         const QString &outFileName,
         const QString &outFileExtn
-    );
+        );
 
 public slots:
     void providePassword(const QString &password);
@@ -32,9 +34,13 @@ signals:
     void needPassword();
     void finished();
 
+    void debug(const QString &debug);
+
 private:
     QThread *workerThread = nullptr;
     CSRSigner *worker = nullptr;
 };
+
+}
 
 #endif // SIGNCERTCONTROLLER_H

@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+namespace SignCert {
+
 class FileHandler : public QObject
 {
     Q_OBJECT
@@ -12,5 +14,7 @@ public:
     Q_INVOKABLE bool folderExists(const QString &folder);
     Q_INVOKABLE bool fileExists(const QString &file);
 };
+
+}
 
 #endif // FILEHANDLER_H
