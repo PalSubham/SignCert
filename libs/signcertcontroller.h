@@ -22,15 +22,14 @@ public:
         const QString &outDir,
         const QString &outFileName,
         const QString &outFileExtn
-        );
-
-public slots:
-    void providePassword(const QString &password);
+    );
+    Q_INVOKABLE void providePassword(const QString &password);
 
 signals:
     void info(const QString &info);
     void warn(const QString &warn);
     void error(const QString &error);
+    void passwordProvided(const QString &password);
     void needPassword();
     void finished();
 

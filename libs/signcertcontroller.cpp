@@ -31,6 +31,7 @@ void SignCertController::startSigning(
     connect(worker, &CSRSigner::error, this, &SignCertController::error);
     connect(worker, &CSRSigner::debug, this, &SignCertController::debug);
     connect(worker, &CSRSigner::needPassword, this, &SignCertController::needPassword);
+    connect(this, &SignCertController::passwordProvided, worker, &CSRSigner::providePassword, Qt::QueuedConnection);
     connect(worker, &CSRSigner::finished, this, [=, this]() {
         workerThread->quit();
         workerThread->wait();
@@ -48,11 +49,6 @@ void SignCertController::providePassword(const QString &password)
 {
     if (worker)
     {
-        QMetaObject::invokeMethod(
-            worker,
-            "providePassword",
-            Qt::QueuedConnection,
-            Q_ARG(QString, password)
-        );
+        emit passwordProvided(password);
     }
 }
