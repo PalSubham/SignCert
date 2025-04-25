@@ -13,7 +13,7 @@ void SignCertController::startSigning(
     const unsigned int days,
     const QString &outDir,
     const QString &outFileName,
-    const QString &outFileExtn
+    const bool &outFileType
 )
 {
     if (workerThread) return;
@@ -21,7 +21,7 @@ void SignCertController::startSigning(
     workerThread = new QThread;
     worker = new CSRSigner;
 
-    worker->setParams(csr, ca, caKey, days, outDir, outFileName, outFileExtn);
+    worker->setParams(csr, ca, caKey, days, outDir, outFileName, outFileType);
     worker->moveToThread(workerThread);
 
     connect(workerThread, &QThread::started, worker, &CSRSigner::sign);

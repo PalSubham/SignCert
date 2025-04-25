@@ -36,7 +36,7 @@ public:
         const unsigned int days,
         const QString &outDir,
         const QString &outFileName,
-        const QString &outFileExtn
+       const bool &outFileType
         );
     void sign();
 
@@ -53,7 +53,8 @@ signals:
     void debug(const QString &debug);
 
 private:
-    QString csrFile, caFile, caKeyFile, outDir, outFileName, outFileExtn, password;
+    QString csrFile, caFile, caKeyFile, outDir, outFileName, password;
+    bool outFileType;
     unsigned int days;
 
     unique_ptr<RandomNumberGenerator> rng;

@@ -324,7 +324,12 @@ ApplicationWindow {
             ComboBox {
                 id: outExtnField
                 width: 140
-                model: [qsTr(".pem"), qsTr(".der")]
+                textRole: "text"
+                valueRole: "value"
+                model: [
+                    {value: true, text: qsTr("PEM (.crt)")},
+                    {value: false, text: qsTr("DER (.der)")}
+                ]
                 currentIndex: 0
                 enabled: !signing
             }
@@ -346,24 +351,24 @@ ApplicationWindow {
             onClicked: {
                 let valid = true;
 
-                if (!filehandler.fileExists(csrField.text)) {
+                if (!filehandler.fileCheck(csrField.text)) {
                     valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("CSR Doesn't Exist"), statusHelper.error);
+                    statusHelper.appendStatus(statusList, qsTr("Invalid CSR"), statusHelper.error);
                 }
 
-                if (!filehandler.fileExists(caCertField.text)) {
+                if (!filehandler.fileCheck(caCertField.text)) {
                     valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("CA Cert Doesn't Exist"), statusHelper.error);
+                    statusHelper.appendStatus(statusList, qsTr("Invalid CA Cert"), statusHelper.error);
                 }
 
-                if (!filehandler.fileExists(caKeyField.text)) {
+                if (!filehandler.fileCheck(caKeyField.text)) {
                     valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("CA Key Doesn't Exist"), statusHelper.error);
+                    statusHelper.appendStatus(statusList, qsTr("Invalid CA Key"), statusHelper.error);
                 }
 
-                if (!filehandler.folderExists(outFolderField.text)) {
+                if (!filehandler.dirCheck(outFolderField.text)) {
                     valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("Out Directory Doesn't Exist"), statusHelper.error);
+                    statusHelper.appendStatus(statusList, qsTr("Invalid Out Directory"), statusHelper.error);
                 }
 
                 if (valid) {

@@ -1,4 +1,5 @@
 #include <QDir>
+#include <QFileInfo>
 
 #include "filehandler.h"
 
@@ -8,12 +9,14 @@ FileHandler::FileHandler(QObject *parent)
     : QObject{parent}
 {}
 
-bool FileHandler::folderExists(const QString &folder)
+bool FileHandler::dirCheck(const QString &dir_name)
 {
-    return QDir(folder).exists();
+    QFileInfo dir(dir_name);
+    return dir.isDir() && dir.isWritable();
 }
 
-bool FileHandler::fileExists(const QString &file)
+bool FileHandler::fileCheck(const QString &file_name)
 {
-    return QFile::exists(file);
+    QFileInfo file(file_name);
+    return file.isFile() && file.isReadable();
 }

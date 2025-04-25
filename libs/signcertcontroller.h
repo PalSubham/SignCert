@@ -18,10 +18,10 @@ public:
         const QString &csr,
         const QString &ca,
         const QString &caKey,
-        const unsigned int days,
+        const unsigned int &days,
         const QString &outDir,
         const QString &outFileName,
-        const QString &outFileExtn
+        const bool &outFileType
     );
     Q_INVOKABLE void providePassword(const QString &password);
 

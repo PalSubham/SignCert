@@ -5,6 +5,7 @@
 
 #include <QFile>
 #include <QScopedPointer>
+#include <QTextStream>
 
 #include <botan/asn1_obj.h>
 #include <botan/auto_rng.h>
@@ -37,7 +38,7 @@ void CSRSigner::setParams(
     const unsigned int days,
     const QString &outDir,
     const QString &outFileName,
-    const QString &outFileExtn
+    const bool &outFileType
 )
 {
     this->csrFile = csrFile;
@@ -46,7 +47,7 @@ void CSRSigner::setParams(
     this->days = days;
     this->outDir = outDir;
     this->outFileName = outFileName;
-    this->outFileExtn = outFileExtn;
+    this->outFileType = outFileType;
 }
 
 void CSRSigner::sign()
@@ -73,10 +74,71 @@ void CSRSigner::sign()
     X509_Time not_after(now + chrono::days(days));
 
     BigInt serial;
-    serial.randomize(*rng, 120);
+    serial.randomize(*rng, 120, false);
     serial.set_sign(BigInt::Positive);
 
-    unique_ptr<X509_Certificate> out = make_unique<X509_Certificate>(ca_item->sign_request(*csr, *rng, serial, not_before, not_after));
+    X509_Certificate out = ca_item->sign_request(*csr, *rng, serial, not_before, not_after);
+
+    auto fileDeleter = [](QFile *f) {
+        if (f->isOpen()) f->close();
+        delete f;
+    };
+
+    if (outFileType)
+    {
+        unique_ptr<QFile, decltype(fileDeleter)> out_file(new QFile(outDir + outFileName + ".crt"), fileDeleter);
+
+        if (!out_file->open(
+            QIODevice::WriteOnly | QIODevice::Text,
+            QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ReadOther
+        ))
+        {
+            emit error("Error opening out file for saving");
+        }
+        else
+        {
+            QTextStream out_stream(out_file.get());
+
+            out_stream << QString::fromStdString(out.PEM_encode());
+            out_stream.flush();
+
+            if (out_stream.status() != QTextStream::Ok)
+            {
+                emit error("Error Saving PEM Format Certificate");
+            }
+            else
+            {
+                emit info("PEM Format Certificate Saved");
+            }
+        }
+    }
+    else
+    {
+        unique_ptr<QFile, decltype(fileDeleter)> out_file(new QFile(outDir + outFileName + ".der"), fileDeleter);
+
+        if (!out_file->open(
+                QIODevice::WriteOnly,
+                QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ReadOther
+                ))
+        {
+            emit error("Error opening out file for saving");
+        }
+        else
+        {
+            vector<uint8_t> data = out.BER_encode();
+
+            if (out_file->write(reinterpret_cast<const char *>(data.data())) == -1)
+            {
+                emit error("Error Saving PEM Format Certificate");
+            }
+            else
+            {
+                emit info("DER Format Certificate Saved");
+            }
+        }
+    }
+
+    emit finished();
 }
 
 unique_ptr<PKCS10_Request> CSRSigner::load_csr()
