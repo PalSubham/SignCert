@@ -28,11 +28,11 @@ qt_add_qml_module(appSignCert
         QML_FILES qmls/Status.qml
         QML_FILES qmls/PersistentFileDialog.qml
         QML_FILES qmls/PersistentFolderDialog.qml
-        SOURCES libs/filehandler.h libs/filehandler.cpp
+        SOURCES libs/filehandler.hpp libs/filehandler.cpp
         QML_FILES qmls/PasswordModal.qml
-        SOURCES libs/csrsigner.h libs/csrsigner.cpp
-        SOURCES libs/signcertcontroller.h libs/signcertcontroller.cpp
-        SOURCES libs/oidhasher.h libs/oidhasher.cpp
+        SOURCES libs/csrsigner.hpp libs/csrsigner.cpp
+        SOURCES libs/signcertcontroller.hpp libs/signcertcontroller.cpp
+        SOURCES
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

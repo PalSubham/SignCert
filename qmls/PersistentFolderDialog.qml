@@ -14,7 +14,7 @@ FolderDialog {
     }
 
     Component.onCompleted: {
-        if (settings.lastDirectory && filehandler.dirCheck(settings.lastDirectory.replace("file://", ""))) {
+        if (filehandler.dirCheck(settings.lastDirectory.replace("file://", ""))) {
             currentFolder = settings.lastDirectory;
         } else {
             currentFolder = StandardPaths.standardLocations(StandardPaths.HomeLocation)[0];

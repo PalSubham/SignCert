@@ -1,4 +1,4 @@
-#include "signcertcontroller.h"
+#include "signcertcontroller.hpp"
 
 using namespace SignCert;
 
@@ -6,15 +6,13 @@ SignCertController::SignCertController(QObject *parent)
     : QObject{parent}
 {}
 
-void SignCertController::startSigning(
-    const QString &csr,
-    const QString &ca,
-    const QString &caKey,
-    const unsigned int days,
-    const QString &outDir,
-    const QString &outFileName,
-    const bool &outFileType
-)
+void SignCertController::startSigning(const QString &csr,
+                                      const QString &ca,
+                                      const QString &caKey,
+                                      const unsigned int days,
+                                      const QString &outDir,
+                                      const QString &outFileName,
+                                      const bool outFileType)
 {
     if (workerThread) return;
 

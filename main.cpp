@@ -2,8 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "libs/filehandler.h"
-#include "libs/signcertcontroller.h"
+#include "libs/filehandler.hpp"
+#include "libs/signcertcontroller.hpp"
 
 using namespace SignCert;
 

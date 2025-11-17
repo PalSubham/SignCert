@@ -1,7 +1,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include "filehandler.h"
+#include "filehandler.hpp"
 
 using namespace SignCert;
 

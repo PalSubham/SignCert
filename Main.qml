@@ -33,7 +33,7 @@ ApplicationWindow {
         settingsKey: "caCertDialog"
         title: qsTr("Please Choose the CA certificate")
         fileMode: FileDialog.OpenFile
-        nameFilters: [qsTr("CRT file (*.csr)"), qsTr("PEM file (*.pem)"), qsTr("DER file (*.der)")]
+        nameFilters: [qsTr("CRT file (*.crt)"), qsTr("PEM file (*.pem)"), qsTr("DER file (*.der)")]
         onAccepted: {
             caCertField.text = selectedFile.toString().replace("file://", "");
             statusHelper.appendStatus(statusList, qsTr(`CA: ${caCertField.text}`), statusHelper.info);
