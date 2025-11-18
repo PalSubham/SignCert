@@ -1,5 +1,4 @@
 #include <chrono>
-#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -57,17 +56,23 @@ void CSRSigner::sign()
 
     auto now = chrono::system_clock::now();
 
-    if (!csr || !ca || !ca_key) emit finished();
+    if (!csr || !ca || !ca_key) {
+        emit finished();
+        return;
+    }
 
-    if (!ca->is_CA_cert() || ca->not_after().to_std_timepoint() < now)
-    {
+    if (!ca->is_CA_cert() || ca->not_after().to_std_timepoint() < now) {
         emit error("CA Certificate Invalid");
         emit finished();
+        return;
     }
 
     unique_ptr<X509_CA> ca_item = make_ca(*ca, *ca_key);
 
-    if (!ca_item) emit finished();
+    if (!ca_item) {
+        emit finished();
+        return;
+    }
 
     X509_Time not_before(now);
     X509_Time not_after(now + chrono::days(days));
@@ -78,14 +83,12 @@ void CSRSigner::sign()
 
     X509_Certificate out = ca_item->sign_request(*csr, *rng, serial, not_before, not_after);
 
-    auto fileDeleter = [](QFile *f) {
-        if (f->isOpen()) f->close();
-        delete f;
-    };
-
     if (outFileType)
     {
-        unique_ptr<QFile, decltype(fileDeleter)> out_file(new QFile(outDir + outFileName + ".crt"), fileDeleter);
+        unique_ptr<QFile, decltype(&CSRSigner::file_close)> out_file(new QFile(outDir + "/"
+                                                                               + outFileName
+                                                                               + ".crt"),
+                                                                     &CSRSigner::file_close);
 
         if (!out_file->open(QIODevice::WriteOnly | QIODevice::Text,
                             QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup
@@ -109,7 +112,10 @@ void CSRSigner::sign()
     }
     else
     {
-        unique_ptr<QFile, decltype(fileDeleter)> out_file(new QFile(outDir + outFileName + ".der"), fileDeleter);
+        unique_ptr<QFile, decltype(&CSRSigner::file_close)> out_file(new QFile(outDir + "/"
+                                                                               + outFileName
+                                                                               + ".der"),
+                                                                     &CSRSigner::file_close);
 
         if (!out_file->open(QIODevice::WriteOnly,
                             QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup
@@ -130,6 +136,7 @@ void CSRSigner::sign()
     }
 
     emit finished();
+    return;
 }
 
 unique_ptr<PKCS10_Request> CSRSigner::load_csr()
@@ -187,10 +194,16 @@ unique_ptr<X509_CA> CSRSigner::make_ca(const X509_Certificate &ca, const Private
     const OID sig_oid = ca.signature_algorithm().oid();
     auto it = oidToHashAlgoMap.find(sig_oid);
 
-    if (it != oidToHashAlgoMap.end())
-        return make_unique<X509_CA>(ca, ca_key, it->second, *rng);
+    if (it != oidToHashAlgoMap.end()) {
+        try {
+            return make_unique<X509_CA>(ca, ca_key, it->second, *rng);
+        } catch (exception &e) {
+            emit error("CA generation Failed");
+        }
+    } else {
+        emit error("Unsupported Signing Algorithm");
+    }
 
-    emit error("Unsupported Signing Algorithm");
     return nullptr;
 }
 
@@ -212,4 +225,15 @@ void CSRSigner::providePassword(const QString &password)
 {
     this->password = password;
     emit passwordReady();
+}
+
+void CSRSigner::file_close(QFile *f)
+{
+    if (f) {
+        if (f->isOpen()) {
+            f->close();
+        }
+
+        delete f;
+    }
 }

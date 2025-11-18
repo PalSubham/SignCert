@@ -3,8 +3,8 @@
 #include <memory>
 #include <unordered_map>
 
+#include <QFile>
 #include <QObject>
-#include <QWaitCondition>
 
 #include <botan/x509_ca.h>
 #include <botan/x509cert.h>
@@ -58,6 +58,8 @@ private:
 
     unique_ptr<X509_CA> make_ca(const X509_Certificate &ca, const Private_Key &ca_key);
     const string fetch_password();
+
+    static void file_close(QFile *f);
 
     inline const static unordered_map<OID, string> oidToHashAlgoMap = {
         {OID({1, 2, 840, 113549, 1, 1, 11}), "SHA-256"}, // SHA256withRSA

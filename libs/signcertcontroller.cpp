@@ -32,7 +32,6 @@ void SignCertController::startSigning(const QString &csr,
     connect(this, &SignCertController::passwordProvided, worker, &CSRSigner::providePassword, Qt::QueuedConnection);
     connect(worker, &CSRSigner::finished, this, [=, this]() {
         workerThread->quit();
-        workerThread->wait();
         worker->deleteLater();
         workerThread->deleteLater();
         worker = nullptr;

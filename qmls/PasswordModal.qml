@@ -104,6 +104,7 @@ Popup {
                 enabled: passwordPresent
                 onClicked: {
                     signcert.providePassword(passwordField.text);
+                    passwordField.text="";
                     passwordModal.close();
                 }
                 Layout.alignment: Qt.AlignRight
