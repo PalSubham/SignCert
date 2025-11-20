@@ -78,7 +78,7 @@ ApplicationWindow {
     }
 
     Connections {
-        target: signcert
+        target: controller
 
         function onNeedPassword() {
             passwordModal.open();
@@ -373,7 +373,7 @@ ApplicationWindow {
 
                 if (valid) {
                     signing = true;
-                    signcert.startSigning(
+                    controller.startSigning(
                         csrField.text,
                         caCertField.text,
                         caKeyField.text,

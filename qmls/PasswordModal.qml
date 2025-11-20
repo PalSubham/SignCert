@@ -46,7 +46,7 @@ Popup {
                 spacing: 10
                 Layout.fillWidth: true
 
-                Text {
+                Label {
                     text: qsTr("Password for CA Key")
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -103,7 +103,7 @@ Popup {
                 }
                 enabled: passwordPresent
                 onClicked: {
-                    signcert.providePassword(passwordField.text);
+                    controller.providePassword(passwordField.text);
                     passwordField.text="";
                     passwordModal.close();
                 }

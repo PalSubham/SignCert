@@ -2,12 +2,12 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
+#include "libs/controller.hpp"
 #include "libs/filehandler.hpp"
-#include "libs/signcertcontroller.hpp"
 
 using namespace SignCert;
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
 
@@ -18,10 +18,10 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     FileHandler filehandler;
-    SignCertController signCertController;
+    Controller controller;
 
     engine.rootContext()->setContextProperty("filehandler", &filehandler);
-    engine.rootContext()->setContextProperty("signcert", &signCertController);
+    engine.rootContext()->setContextProperty("controller", &controller);
 
     QObject::connect(
         &engine,
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
-    engine.loadFromModule("SignCert", "Main");
+    engine.loadFromModule("SignCertQml", "Main");
 
     int result = app.exec();
 

@@ -40,12 +40,13 @@ signals:
     void warn(const QString &warn);
     void error(const QString &error);
     void needPassword();
-    void passwordReady();
     void finished();
 
     void debug(const QString &debug);
 
 private:
+    Q_SIGNAL void passwordReady();
+
     QString csrFile, caFile, caKeyFile, outDir, outFileName, password;
     bool outFileType;
     unsigned int days;

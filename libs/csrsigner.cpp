@@ -4,8 +4,6 @@
 
 #include <QEventLoop>
 #include <QFile>
-#include <QScopedPointer>
-#include <QTextStream>
 
 #include <botan/asn1_obj.h>
 #include <botan/auto_rng.h>
@@ -54,7 +52,7 @@ void CSRSigner::sign()
     unique_ptr<X509_Certificate> ca = load_ca();
     unique_ptr<Private_Key> ca_key = load_ca_key();
 
-    auto now = chrono::system_clock::now();
+    chrono::time_point now = chrono::system_clock::now();
 
     if (!csr || !ca || !ca_key) {
         emit finished();
@@ -95,17 +93,11 @@ void CSRSigner::sign()
                                 | QFileDevice::ReadOther)) {
             emit error("Error opening out file for saving");
         } else {
-            QTextStream out_stream(out_file.get());
+            string data = out.PEM_encode();
 
-            out_stream << QString::fromStdString(out.PEM_encode());
-            out_stream.flush();
-
-            if (out_stream.status() != QTextStream::Ok)
-            {
+            if (out_file->write(data.c_str(), data.size()) == -1) {
                 emit error("Error Saving PEM Format Certificate");
-            }
-            else
-            {
+            } else {
                 emit info("PEM Format Certificate Saved");
             }
         }
@@ -124,12 +116,9 @@ void CSRSigner::sign()
         } else {
             vector<uint8_t> data = out.BER_encode();
 
-            if (out_file->write(reinterpret_cast<const char *>(data.data())) == -1)
-            {
+            if (out_file->write(reinterpret_cast<const char *>(data.data()), data.size()) == -1) {
                 emit error("Error Saving DER Format Certificate");
-            }
-            else
-            {
+            } else {
                 emit info("DER Format Certificate Saved");
             }
         }
