@@ -76,6 +76,7 @@ Popup {
                         Layout.preferredWidth: 400
                         Layout.fillHeight: true
                         placeholderText: qsTr("Enter Password...")
+                        focus: true
                         echoMode: passwordVisible ? TextInput.Normal : TextInput.Password
                         onTextChanged: debounceTimer.restart()
                     }
@@ -84,6 +85,7 @@ Popup {
                         Layout.fillHeight: true
                         Layout.preferredWidth: height
                         icon.source: passwordVisible ? "qrc:/icons/visibility_off" : "qrc:/icons/visibility"
+                        icon.color: mainWindow.palette.text
                         onClicked: passwordVisible = !passwordVisible
                     }
                 }
