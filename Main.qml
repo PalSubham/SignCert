@@ -1,6 +1,7 @@
 import QtCore
 import QtQuick
 import QtQuick.Dialogs
+import QtQuick.Controls.Fusion
 import QtQuick.Controls
 
 import "qmls"
