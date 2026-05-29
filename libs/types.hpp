@@ -2,20 +2,18 @@
 
 #include <QtQml/QQmlComponent>
 
-namespace SignCert {
-
-class Types
+namespace SignCert
 {
-    Q_GADGET
-    QML_ELEMENT
-
-public:
-    enum OutputFormat
+    namespace Types
     {
-        PEM,
-        DER
-    };
-    Q_ENUM(OutputFormat)
-};
+        Q_NAMESPACE
+        QML_ELEMENT
 
+        enum OutputFormat
+        {
+            PEM,
+            DER
+        };
+        Q_ENUM_NS(OutputFormat)
+    }
 } // namespace SignCert
