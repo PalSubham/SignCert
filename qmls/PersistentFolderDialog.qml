@@ -4,6 +4,7 @@ import QtCore
 import QtQuick
 import QtQuick.Dialogs
 
+import SignCertQml
 
 FolderDialog {
     id: folderDialog
@@ -16,7 +17,7 @@ FolderDialog {
     }
 
     Component.onCompleted: {
-        if (filehandler.dirCheck(settings.lastDirectory.replace("file://", ""))) {
+        if (FileHandler.dirCheck(settings.lastDirectory.replace("file://", ""))) {
             currentFolder = settings.lastDirectory;
         } else {
             currentFolder = StandardPaths.standardLocations(StandardPaths.HomeLocation)[0];

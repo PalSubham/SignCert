@@ -14,6 +14,8 @@
 #include <botan/pkcs8.h>
 #include <botan/rng.h>
 
+#include "types.hpp"
+
 using namespace std;
 using namespace Botan;
 
@@ -22,6 +24,7 @@ namespace SignCert {
 class CSRSigner : public QObject
 {
     Q_OBJECT
+
 public:
     explicit CSRSigner(QObject *parent = nullptr);
 
@@ -31,7 +34,7 @@ public:
                    const unsigned int days,
                    const QString &outDir,
                    const QString &outFileName,
-                   const bool outFileType);
+                   const Types::OutputFormat outFileType);
     void sign();
 
 public slots:
@@ -41,16 +44,15 @@ signals:
     void info(const QString &info);
     void warn(const QString &warn);
     void error(const QString &error);
+    void debug(const QString &debug);
     void needPassword();
     void finished();
 
-    void debug(const QString &debug);
+    void passwordReady(const QString &password, QPrivateSignal);
 
 private:
-    Q_SIGNAL void passwordReady();
-
-    QString csrFile, caFile, caKeyFile, outDir, outFileName, password;
-    bool outFileType;
+    QString csrFile, caFile, caKeyFile, outDir, outFileName;
+    Types::OutputFormat outFileType;
     unsigned int days;
 
     unique_ptr<RandomNumberGenerator> rng;
@@ -78,4 +80,4 @@ private:
     };
 };
 
-}
+} // namespace SignCert

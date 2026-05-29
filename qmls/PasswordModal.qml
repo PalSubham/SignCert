@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import SignCertQml
 
 Popup {
     id: passwordModal
@@ -107,7 +108,7 @@ Popup {
                 }
                 enabled: passwordPresent
                 onClicked: {
-                    controller.providePassword(passwordField.text);
+                    Controller.providePassword(passwordField.text);
                     passwordField.text="";
                     passwordModal.close();
                 }

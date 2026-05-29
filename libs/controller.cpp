@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "controller.hpp"
+#include "csrsigner.hpp"
 
 using namespace SignCert;
 
@@ -14,38 +15,76 @@ void Controller::startSigning(const QString &csr,
                               const unsigned int days,
                               const QString &outDir,
                               const QString &outFileName,
-                              const bool outFileType)
+                              const Types::OutputFormat outFileType)
 {
-    if (workerThread) return;
+    if (m_signing)
+    {
+        emit warn("Signing already in progress");
+        return;
+    }
 
-    workerThread = new QThread;
-    worker = new CSRSigner;
+    m_signing = true;
+    emit signingChanged();
 
-    worker->setParams(csr, ca, caKey, days, outDir, outFileName, outFileType);
-    worker->moveToThread(workerThread);
+    // Only if needed
+    if (!workerThread)
+    {
+        workerThread = new QThread;
+        worker = new CSRSigner;
 
-    connect(workerThread, &QThread::started, worker, &CSRSigner::sign);
+        worker->moveToThread(workerThread);
 
-    connect(worker, &CSRSigner::info, this, &Controller::info);
-    connect(worker, &CSRSigner::warn, this, &Controller::warn);
-    connect(worker, &CSRSigner::error, this, &Controller::error);
-    connect(worker, &CSRSigner::debug, this, &Controller::debug);
-    connect(worker, &CSRSigner::needPassword, this, &Controller::needPassword);
-    connect(this,
+        // Setup
+        connect(worker, &CSRSigner::info, this, &Controller::info);
+        connect(worker, &CSRSigner::warn, this, &Controller::warn);
+        connect(worker, &CSRSigner::error, this, &Controller::error);
+        connect(worker, &CSRSigner::debug, this, &Controller::debug);
+        connect(worker, &CSRSigner::needPassword, this, &Controller::needPassword);
+        connect(
+            this,
             &Controller::passwordProvided,
             worker,
             &CSRSigner::providePassword,
-            Qt::QueuedConnection);
-    connect(worker, &CSRSigner::finished, this, [=, this]() {
-        workerThread->quit();
-        worker->deleteLater();
-        workerThread->deleteLater();
-        worker = nullptr;
-        workerThread = nullptr;
-        emit finished();
-    });
+            Qt::QueuedConnection
+        );
+        connect(
+            worker,
+            &CSRSigner::finished,
+            this,
+            [this]()
+            {
+                // Guard
+                if (!workerThread || !worker) return;
 
-    workerThread->start();
+                // Reset state
+                m_signing = false;
+                emit signingChanged();
+
+                emit finished();
+
+                workerThread->quit();
+                worker->deleteLater();
+                workerThread->deleteLater();
+
+                worker = nullptr;
+                workerThread = nullptr;
+            }
+        );
+
+        // Start worker thread
+        workerThread->start();
+    }
+
+    // Set parameters
+    worker->setParams(csr, ca, caKey, days, outDir, outFileName, outFileType);
+
+    // Trigger actual signing
+    QMetaObject::invokeMethod(worker, &CSRSigner::sign, Qt::QueuedConnection);
+}
+
+bool Controller::signing() const
+{
+    return m_signing;
 }
 
 void Controller::providePassword(const QString &password)

@@ -8,12 +8,16 @@
 #include <QFile>
 
 #include <botan/asn1_obj.h>
-#include <botan/auto_rng.h>
 #include <botan/bigint.h>
 #include <botan/data_src.h>
 #include <botan/exceptn.h>
 #include <botan/pkcs8.h>
+
+#if defined(BOTAN_HAS_SYSTEM_RNG)
 #include <botan/system_rng.h>
+#else
+#include <botan/auto_rng.h>
+#endif
 
 #include "csrsigner.hpp"
 
@@ -37,7 +41,7 @@ void CSRSigner::setParams(const QString &csrFile,
                           const unsigned int days,
                           const QString &outDir,
                           const QString &outFileName,
-                          const bool outFileType)
+                          const Types::OutputFormat outFileType)
 {
     this->csrFile = csrFile;
     this->caFile = caFile;
@@ -54,14 +58,16 @@ void CSRSigner::sign()
     unique_ptr<X509_Certificate> ca = load_ca();
     unique_ptr<Private_Key> ca_key = load_ca_key();
 
-    chrono::time_point now = chrono::system_clock::now();
+    auto now = chrono::system_clock::now();
 
-    if (!csr || !ca || !ca_key) {
+    if (!csr || !ca || !ca_key)
+    {
         emit finished();
         return;
     }
 
-    if (!ca->is_CA_cert() || ca->not_after().to_std_timepoint() < now) {
+    if (!ca->is_CA_cert() || ca->not_after().to_std_timepoint() < now)
+    {
         emit error("CA Certificate Invalid");
         emit finished();
         return;
@@ -69,7 +75,8 @@ void CSRSigner::sign()
 
     unique_ptr<X509_CA> ca_item = make_ca(*ca, *ca_key);
 
-    if (!ca_item) {
+    if (!ca_item)
+    {
         emit finished();
         return;
     }
@@ -83,46 +90,62 @@ void CSRSigner::sign()
 
     X509_Certificate out = ca_item->sign_request(*csr, *rng, serial, not_before, not_after);
 
-    if (outFileType)
+    switch (outFileType)
     {
-        unique_ptr<QFile, decltype(&CSRSigner::file_close)> out_file(new QFile(outDir + "/"
-                                                                               + outFileName
-                                                                               + ".crt"),
-                                                                     &CSRSigner::file_close);
+        case Types::OutputFormat::PEM:
+        {
+            unique_ptr<QFile, decltype(&CSRSigner::file_close)> out_file(
+                new QFile(outDir + "/" + outFileName + ".crt"),
+                &CSRSigner::file_close
+            );
 
-        if (!out_file->open(QIODevice::WriteOnly | QIODevice::Text,
-                            QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup
-                                | QFileDevice::ReadOther)) {
-            emit error("Error opening out file for saving");
-        } else {
-            string data = out.PEM_encode();
-
-            if (out_file->write(data.c_str(), data.size()) == -1) {
-                emit error("Error Saving PEM Format Certificate");
-            } else {
-                emit info("PEM Format Certificate Saved");
+            if (!out_file->open(
+                QIODevice::WriteOnly | QIODevice::Text,
+                QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup | QFileDevice::ReadOther
+            ))
+            {
+                emit error("Error opening out file for saving");
             }
+            else
+            {
+                string data = out.PEM_encode();
+
+                if (out_file->write(data.c_str(), data.size()) == -1) {
+                    emit error("Error Saving PEM Format Certificate");
+                } else {
+                    emit info("PEM Format Certificate Saved");
+                }
+            }
+
+            break;
         }
-    }
-    else
-    {
-        unique_ptr<QFile, decltype(&CSRSigner::file_close)> out_file(new QFile(outDir + "/"
-                                                                               + outFileName
-                                                                               + ".der"),
-                                                                     &CSRSigner::file_close);
 
-        if (!out_file->open(QIODevice::WriteOnly,
-                            QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup
-                                | QFileDevice::ReadOther)) {
-            emit error("Error opening out file for saving");
-        } else {
-            vector<uint8_t> data = out.BER_encode();
+        case Types::OutputFormat::DER:
+        {
+            unique_ptr<QFile, decltype(&CSRSigner::file_close)> out_file(
+                new QFile(outDir + "/" + outFileName + ".der"),
+                &CSRSigner::file_close
+            );
 
-            if (out_file->write(reinterpret_cast<const char *>(data.data()), data.size()) == -1) {
-                emit error("Error Saving DER Format Certificate");
-            } else {
-                emit info("DER Format Certificate Saved");
+            if (!out_file->open(
+                QIODevice::WriteOnly,
+                QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup | QFileDevice::ReadOther
+            ))
+            {
+                emit error("Error opening out file for saving");
             }
+            else
+            {
+                vector<uint8_t> data = out.BER_encode();
+
+                if (out_file->write(reinterpret_cast<const char *>(data.data()), data.size()) == -1) {
+                    emit error("Error Saving DER Format Certificate");
+                } else {
+                    emit info("DER Format Certificate Saved");
+                }
+            }
+
+            break;
         }
     }
 
@@ -185,13 +208,17 @@ unique_ptr<X509_CA> CSRSigner::make_ca(const X509_Certificate &ca, const Private
     const OID sig_oid = ca.signature_algorithm().oid();
     auto it = oidToHashAlgoMap.find(sig_oid);
 
-    if (it != oidToHashAlgoMap.end()) {
-        try {
+    if (it != oidToHashAlgoMap.end())
+    {
+        try
+        {
             return make_unique<X509_CA>(ca, ca_key, it->second, *rng);
         } catch (exception &e) {
             emit error("CA generation Failed");
         }
-    } else {
+    }
+    else
+    {
         emit error("Unsupported Signing Algorithm");
     }
 
@@ -203,27 +230,34 @@ const string CSRSigner::fetch_password()
     emit needPassword();
 
     QEventLoop loop;
-    connect(this, &CSRSigner::passwordReady, &loop, &QEventLoop::quit);
+    QString password;
+
+    connect(
+        this,
+        &CSRSigner::passwordReady,
+        &loop,
+        [&](const QString &pwd)
+        {
+            password = pwd;
+            loop.quit();
+        }
+    );
+
     loop.exec();
 
-    string pwd = password.toStdString();
-    password.clear();
-
-    return pwd;
+    return password.toStdString();
 }
 
 void CSRSigner::providePassword(const QString &password)
 {
-    this->password = password;
-    emit passwordReady();
+    emit passwordReady(password, QPrivateSignal());
 }
 
 void CSRSigner::file_close(QFile *f)
 {
-    if (f) {
-        if (f->isOpen()) {
-            f->close();
-        }
+    if (f)
+    {
+        if (f->isOpen()) f->close();
 
         delete f;
     }

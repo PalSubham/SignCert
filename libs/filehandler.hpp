@@ -3,12 +3,16 @@
 #pragma once
 
 #include <QObject>
+#include <QtQml/QQmlComponent>
 
 namespace SignCert {
 
 class FileHandler : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
+
 public:
     explicit FileHandler(QObject *parent = nullptr);
 
@@ -16,4 +20,4 @@ public:
     Q_INVOKABLE bool fileCheck(const QString &file_name);
 };
 
-}
+} // namespace SignCert

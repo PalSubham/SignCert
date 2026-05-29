@@ -8,14 +8,12 @@
  * (at your option) any later version.
  */
 
-import QtCore
 import QtQuick
 import QtQuick.Dialogs
 import QtQuick.Controls.Fusion
 import QtQuick.Controls
 
-import "qmls"
-
+import SignCertQml
 
 ApplicationWindow {
     id: mainWindow
@@ -24,8 +22,11 @@ ApplicationWindow {
     visible: true
     title: qsTr("Sign Your CSR")
 
-    property bool signing: false
-    property bool dataPresent: false
+    property bool dataPresent: csrField.text.length > 0 &&
+                               caCertField.text.length > 0 &&
+                               caKeyField.text.length > 0 &&
+                               outFolderField.text.length > 0 &&
+                               outFileNameField.text.length > 0
 
     PersistentFileDialog {
         id: csrSelector
@@ -89,14 +90,14 @@ ApplicationWindow {
     }
 
     Connections {
-        target: controller
+        target: Controller
 
         function onNeedPassword() {
             passwordModal.open();
         }
 
         function onFinished() {
-            signing = false;
+            statusHelper.appendStatus(statusList, qsTr("Signing task finished"), statusHelper.info);
         }
 
         function onInfo(msg) {
@@ -113,19 +114,6 @@ ApplicationWindow {
 
         function onDebug(msg) {
             console.log(msg);
-        }
-    }
-
-    Timer {
-        id: debounceTimer
-        interval: 500 // ms
-        repeat: false
-        onTriggered: {
-            dataPresent = csrField.text.length > 0 &&
-                          caCertField.text.length > 0 &&
-                          caKeyField.text.length > 0 &&
-                          outFolderField.text.length > 0 &&
-                          outFileNameField.text.length > 0;
         }
     }
 
@@ -154,7 +142,6 @@ ApplicationWindow {
                 height: parent.height
                 placeholderText: qsTr("No CSR selected...")
                 readOnly: true
-                onTextChanged: debounceTimer.restart()
             }
             Button {
                 width: 140
@@ -168,7 +155,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                enabled: !signing
+                enabled: !Controller.signing
             }
         }
 
@@ -187,7 +174,6 @@ ApplicationWindow {
                 height: parent.height
                 placeholderText: qsTr("No CA certificate selected...")
                 readOnly: true
-                onTextChanged: debounceTimer.restart()
             }
             Button {
                 width: 140
@@ -201,7 +187,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                enabled: !signing
+                enabled: !Controller.signing
             }
         }
 
@@ -220,7 +206,6 @@ ApplicationWindow {
                 height: parent.height
                 placeholderText: qsTr("No CA Key selected...")
                 readOnly: true
-                onTextChanged: debounceTimer.restart()
             }
             Button {
                 width: 140
@@ -234,7 +219,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                enabled: !signing
+                enabled: !Controller.signing
             }
         }
 
@@ -255,7 +240,7 @@ ApplicationWindow {
                 value: 365
                 editable: true
                 width: 350
-                enabled: !signing
+                enabled: !Controller.signing
                 validator: IntValidator {
                     locale: daysField.locale.name
                     bottom: daysField.from
@@ -274,7 +259,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                enabled: !signing
+                enabled: !Controller.signing
             }
         }
 
@@ -297,7 +282,6 @@ ApplicationWindow {
                 height: parent.height
                 placeholderText: qsTr("No output directory chosen...")
                 readOnly: true
-                onTextChanged: debounceTimer.restart()
             }
             Button {
                 width: 140
@@ -311,7 +295,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                enabled: !signing
+                enabled: !Controller.signing
             }
         }
 
@@ -329,8 +313,7 @@ ApplicationWindow {
                 width: 350
                 height: parent.height
                 placeholderText: qsTr("Enter out file name...")
-                enabled: !signing
-                onTextChanged: debounceTimer.restart()
+                enabled: !Controller.signing
             }
             ComboBox {
                 id: outExtnField
@@ -338,11 +321,11 @@ ApplicationWindow {
                 textRole: "text"
                 valueRole: "value"
                 model: [
-                    {value: true, text: qsTr("PEM (.crt)")},
-                    {value: false, text: qsTr("DER (.der)")}
+                    {value: Types.PEM, text: qsTr("PEM (.crt)")},
+                    {value: Types.DER, text: qsTr("DER (.der)")}
                 ]
                 currentIndex: 0
-                enabled: !signing
+                enabled: !Controller.signing
             }
         }
 
@@ -358,33 +341,32 @@ ApplicationWindow {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
-            enabled: !signing && dataPresent
+            enabled: !Controller.signing && dataPresent
             onClicked: {
                 let valid = true;
 
-                if (!filehandler.fileCheck(csrField.text)) {
+                if (!FileHandler.fileCheck(csrField.text)) {
                     valid = false;
                     statusHelper.appendStatus(statusList, qsTr("Invalid CSR"), statusHelper.error);
                 }
 
-                if (!filehandler.fileCheck(caCertField.text)) {
+                if (!FileHandler.fileCheck(caCertField.text)) {
                     valid = false;
                     statusHelper.appendStatus(statusList, qsTr("Invalid CA Cert"), statusHelper.error);
                 }
 
-                if (!filehandler.fileCheck(caKeyField.text)) {
+                if (!FileHandler.fileCheck(caKeyField.text)) {
                     valid = false;
                     statusHelper.appendStatus(statusList, qsTr("Invalid CA Key"), statusHelper.error);
                 }
 
-                if (!filehandler.dirCheck(outFolderField.text)) {
+                if (!FileHandler.dirCheck(outFolderField.text)) {
                     valid = false;
                     statusHelper.appendStatus(statusList, qsTr("Invalid Out Directory"), statusHelper.error);
                 }
 
                 if (valid) {
-                    signing = true;
-                    controller.startSigning(
+                    Controller.startSigning(
                         csrField.text,
                         caCertField.text,
                         caKeyField.text,

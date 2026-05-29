@@ -14,15 +14,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(botan REQUIRED)
 
 qt_standard_project_setup(REQUIRES 6.10)
 
 set(CMAKE_AUTORCC ON)
-set(CMAKE_SKIP_RPATH TRUE)
-set(CMAKE_SKIP_INSTALL_RPATH TRUE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-
-find_library(BOTAN_LIBRARIES NAMES botan-3)
 
 qt_add_executable(SignCert
     main.cpp
@@ -48,15 +44,28 @@ qt_add_qml_module(SignCert
         libs/csrsigner.cpp
         libs/controller.hpp
         libs/controller.cpp
+        libs/types.hpp
+)
+
+target_include_directories(SignCert
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/libs
 )
 
 target_link_libraries(SignCert
-    PRIVATE ${BOTAN_LIBRARIES} Qt6::Quick
+    PRIVATE botan::botan Qt6::Quick
 )
 
 include(GNUInstallDirs)
+
 install(TARGETS SignCert
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+qt_generate_deploy_app_script(
+    TARGET SignCert
+    OUTPUT_SCRIPT deploy_script
+)
+
+install(SCRIPT ${deploy_script})
