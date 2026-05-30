@@ -38,12 +38,11 @@ qt_add_qml_module(SignCert
         qmls/PasswordModal.qml
 
     SOURCES
-        libs/filehandler.hpp
-        libs/filehandler.cpp
-        libs/csrsigner.hpp
-        libs/csrsigner.cpp
         libs/controller.hpp
         libs/controller.cpp
+        libs/csrsigner.hpp
+        libs/csrsigner.cpp
+        libs/filehandler.hpp
         libs/types.hpp
 )
 

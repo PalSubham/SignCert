@@ -22,11 +22,11 @@ ApplicationWindow {
     visible: true
     title: qsTr("Sign Your CSR")
 
-    property bool dataPresent: csrField.text.length > 0 &&
-                               caCertField.text.length > 0 &&
-                               caKeyField.text.length > 0 &&
-                               outFolderField.text.length > 0 &&
-                               outFileNameField.text.length > 0
+    readonly property bool dataPresent: csrField.text.length > 0 &&
+                                        caCertField.text.length > 0 &&
+                                        caKeyField.text.length > 0 &&
+                                        outFolderField.text.length > 0 &&
+                                        outFileNameField.text.length > 0
 
     PersistentFileDialog {
         id: csrSelector
@@ -342,41 +342,15 @@ ApplicationWindow {
                 verticalAlignment: Text.AlignVCenter
             }
             enabled: !Controller.signing && dataPresent
-            onClicked: {
-                let valid = true;
-
-                if (!FileHandler.fileCheck(csrField.text)) {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("Invalid CSR"), statusHelper.error);
-                }
-
-                if (!FileHandler.fileCheck(caCertField.text)) {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("Invalid CA Cert"), statusHelper.error);
-                }
-
-                if (!FileHandler.fileCheck(caKeyField.text)) {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("Invalid CA Key"), statusHelper.error);
-                }
-
-                if (!FileHandler.dirCheck(outFolderField.text)) {
-                    valid = false;
-                    statusHelper.appendStatus(statusList, qsTr("Invalid Out Directory"), statusHelper.error);
-                }
-
-                if (valid) {
-                    Controller.startSigning(
-                        csrField.text,
-                        caCertField.text,
-                        caKeyField.text,
-                        daysField.value,
-                        outFolderField.text,
-                        outFileNameField.text,
-                        outExtnField.currentValue
-                    );
-                }
-            }
+            onClicked: Controller.startSigning(
+                           csrField.text,
+                           caCertField.text,
+                           caKeyField.text,
+                           daysField.value,
+                           outFolderField.text,
+                           outFileNameField.text,
+                           outExtnField.currentValue
+                       )
         }
 
         Divider {
@@ -421,7 +395,5 @@ ApplicationWindow {
         }
     }
 
-    Component.onCompleted: {
-        statusHelper.appendStatus(statusList, qsTr("Welcome..."), statusHelper.info);
-    }
+    Component.onCompleted: statusHelper.appendStatus(statusList, qsTr("Welcome..."), statusHelper.info)
 }

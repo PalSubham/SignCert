@@ -32,7 +32,7 @@ namespace SignCert
             const QString &csrFile,
             const QString &caFile,
             const QString &caKeyFile,
-            const unsigned int days,
+            const qint64 days,
             const QString &outDir,
             const QString &outFileName,
             const Types::OutputFormat outFileType

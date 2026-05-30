@@ -20,16 +20,19 @@ namespace SignCert
 
     public:
         explicit Controller(QObject *parent = nullptr);
+        ~Controller() override;
 
         bool signing() const;
 
-        Q_INVOKABLE void startSigning(const QString &csr,
-                                      const QString &ca,
-                                      const QString &caKey,
-                                      const unsigned int days,
-                                      const QString &outDir,
-                                      const QString &outFileName,
-                                      const Types::OutputFormat outFileType);
+        Q_INVOKABLE void startSigning(
+            const QString &csr,
+            const QString &ca,
+            const QString &caKey,
+            const qint64 days,
+            const QString &outDir,
+            const QString &outFileName,
+            const Types::OutputFormat outFileType
+        );
         Q_INVOKABLE void providePassword(const QString &password);
 
     signals:
@@ -46,5 +49,6 @@ namespace SignCert
         QThread *workerThread = nullptr;
         CSRSigner *worker = nullptr;
         bool m_signing = false;
+        bool m_shuttingDown = false;
     };
 } // namespace SignCert

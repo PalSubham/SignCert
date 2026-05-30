@@ -3,20 +3,19 @@
 #pragma once
 
 #include <QObject>
-#include <QtQml/QQmlComponent>
+#include <QFileInfo>
 
 namespace SignCert
 {
-    class FileHandler : public QObject
+    inline bool dir_check(const QString &dir_name)
     {
-        Q_OBJECT
-        QML_ELEMENT
-        QML_SINGLETON
+        QFileInfo dir(dir_name);
+        return dir.exists() && dir.isDir() && dir.isWritable();
+    }
 
-    public:
-        explicit FileHandler(QObject *parent = nullptr);
-
-        Q_INVOKABLE bool dirCheck(const QString &dir_name);
-        Q_INVOKABLE bool fileCheck(const QString &file_name);
-    };
+    inline bool file_check(const QString &file_name)
+    {
+        QFileInfo file(file_name);
+        return file.exists() && file.isFile() && file.isReadable();
+    }
 } // namespace SignCert

@@ -19,16 +19,7 @@ Popup {
     }
 
     property bool passwordVisible: false
-    property bool passwordPresent: false
-
-    Timer {
-        id: debounceTimer
-        interval: 500 // ms
-        repeat: false
-        onTriggered: {
-            passwordPresent = passwordField.text.length > 0;
-        }
-    }
+    readonly property bool passwordPresent: passwordField.text.length > 0
 
     Rectangle {
         width: passwordColumn.implicitWidth + 40
@@ -81,7 +72,6 @@ Popup {
                         placeholderText: qsTr("Enter Password...")
                         focus: true
                         echoMode: passwordVisible ? TextInput.Normal : TextInput.Password
-                        onTextChanged: debounceTimer.restart()
                     }
 
                     Button {

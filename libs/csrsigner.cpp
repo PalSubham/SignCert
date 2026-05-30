@@ -13,10 +13,12 @@
 #include <botan/exceptn.h>
 #include <botan/pkcs8.h>
 
-#if defined(BOTAN_HAS_SYSTEM_RNG)
-#include <botan/system_rng.h>
+#ifdef BOTAN_HAS_SYSTEM_RNG
+    #include <botan/system_rng.h>
+    #define RNG_CLASS System_RNG
 #else
-#include <botan/auto_rng.h>
+    #include <botan/auto_rng.h>
+    #define RNG_CLASS AutoSeeded_RNG
 #endif
 
 #include "csrsigner.hpp"
@@ -29,18 +31,14 @@ namespace SignCert
     CSRSigner::CSRSigner(QObject *parent)
         : QObject{parent}
     {
-    #if defined(BOTAN_HAS_SYSTEM_RNG)
-        rng.reset(new System_RNG);
-    #else
-        rng.reset(new AutoSeeded_RNG);
-    #endif
+        rng.reset(new RNG_CLASS);
     }
 
     void CSRSigner::sign(
         const QString &csrFile,
         const QString &caFile,
         const QString &caKeyFile,
-        const unsigned int days,
+        const qint64 days,
         const QString &outDir,
         const QString &outFileName,
         const Types::OutputFormat outFileType
